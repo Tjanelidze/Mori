@@ -1,35 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [todos, setTodos] = useState<string[]>([]);
+  const [taskInput, setTaskInput] = useState("");
+
+  const onTaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTaskInput(e.currentTarget.value);
+  };
+
+  const handleConfirm = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newTodos = [...(todos as string[]), taskInput];
+
+    setTodos(newTodos);
+  };
+
+  console.log(todos);
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <h1 className="text-3xl font-bold underline">Hello world!</h1>
+
+      <div className="h-96 w-3xs border-2 border-amber-300">
+        {todos?.map((todo) => (
+          <p className="bg-red-400">{todo}</p>
+        ))}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+
+      <form>
+        <input
+          type="text"
+          placeholder="Write task..."
+          onChange={onTaskChange}
+        />
+
+        <button onClick={handleConfirm}>Add Task</button>
+      </form>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
