@@ -1,41 +1,42 @@
 import { useState } from "react";
+import { TaskInput } from "./components/TaskInput/TaskInput";
+import { TodoItem } from "./components/TodoItem/TodoItem";
 
 function App() {
   const [todos, setTodos] = useState<string[]>([]);
   const [taskInput, setTaskInput] = useState("");
 
-  const onTaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTaskInput(e.currentTarget.value);
   };
 
-  const handleConfirm = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newTodos = [...(todos as string[]), taskInput];
 
+    setTaskInput("");
     setTodos(newTodos);
   };
 
-  console.log(todos);
+  const handleDelete = (todoId: number) => {
+    setTodos((todos) => todos.filter((_, i) => i !== todoId));
+  };
 
   return (
     <>
-      <h1 className="text-3xl font-bold underline">Hello world!</h1>
+      <h1 className="text-3xl font-bold">Mori</h1>
 
       <div className="h-96 w-3xs border-2 border-amber-300">
-        {todos?.map((todo) => (
-          <p className="bg-red-400">{todo}</p>
+        {todos?.map((todo, i) => (
+          <TodoItem key={i} todoId={i} todo={todo} onDelete={handleDelete} />
         ))}
       </div>
 
-      <form>
-        <input
-          type="text"
-          placeholder="Write task..."
-          onChange={onTaskChange}
-        />
-
-        <button onClick={handleConfirm}>Add Task</button>
-      </form>
+      <TaskInput
+        onSubmit={handleSubmit}
+        onTaskChange={handleTaskChange}
+        taskInput={taskInput}
+      />
     </>
   );
 }
