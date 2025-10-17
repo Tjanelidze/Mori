@@ -19,6 +19,8 @@ function App() {
   const [todos, setTodos] = useState<Todos[]>([]);
   const [taskInput, setTaskInput] = useState("");
   const [page, setPage] = useState(0);
+  const [editTodo, setEditTodo] = useState<Todos>();
+
   const start = page * PAGE_SIZE;
   const end = start + PAGE_SIZE;
   const paginationTodos = todos.slice(start, end);
@@ -46,11 +48,20 @@ function App() {
   };
 
   // TODO: implement edit mode
-  const handleEdit = (todoId: string) => {};
+  const handleEdit = (todoId: string) => {
+    // if (todo.id === todoId) setIsEdit(true);
+
+    const selectedTodo = todos.find((todo) => todo.id === todoId);
+    setEditTodo(selectedTodo);
+
+    console.log(selectedTodo);
+  };
 
   useEffect(() => {
     const fetchTodos = async () => {
-      const data = await getFetch("https://jsonplaceholder.typicode.com/todos");
+      const data = await getFetch(
+        "https://jsonplaceholder.typicode.com/todos?_limit=5",
+      );
 
       setTodos(data);
     };
@@ -66,8 +77,9 @@ function App() {
         {paginationTodos?.map((todo) => (
           <TodoItem
             key={todo.id}
-            todoId={todo.id}
             todo={todo}
+            editTodo={editTodo}
+            setEditTodo={setEditTodo}
             onDelete={handleDelete}
             onEdit={handleEdit}
           />
