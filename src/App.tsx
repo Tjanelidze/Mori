@@ -67,10 +67,6 @@ function App() {
     fetchTodos();
   }, []);
 
-  useEffect(() => {
-    console.log("second");
-  });
-
   return (
     <>
       <h1 className="text-3xl font-bold">Mori</h1>
