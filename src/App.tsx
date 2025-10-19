@@ -58,7 +58,7 @@ function App() {
   useEffect(() => {
     const fetchTodos = async () => {
       const data = await getFetch(
-        "https://jsonplaceholder.typicode.com/todos?_limit=5",
+        `https://jsonplaceholder.typicode.com/todos?_limit=${PAGE_SIZE}`,
       );
 
       setTodos(data);
