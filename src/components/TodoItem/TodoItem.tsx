@@ -5,6 +5,7 @@ interface TodoItemProps {
   todo: Todos;
   selectedTodo?: Todos;
   setEditTodo: React.Dispatch<React.SetStateAction<Todos | undefined>>;
+  setTodos: React.Dispatch<React.SetStateAction<Todos[]>>;
   onDelete: (todoId: string) => void;
   onEdit: (todoId: string) => void;
 }
@@ -15,6 +16,7 @@ export const TodoItem = ({
   onEdit,
   selectedTodo,
   setEditTodo,
+  setTodos,
 }: TodoItemProps) => {
   const [isEdit, setIsEdit] = useState(false);
 
@@ -26,18 +28,24 @@ export const TodoItem = ({
           e.preventDefault();
 
           setIsEdit(false);
+          setTodos((prev) => {
+            return prev.map((item) => {
+              if (item.id === selectedTodo!.id) {
+                return selectedTodo!;
+              }
+
+              return item;
+            });
+          });
         }}
       >
         <input
           type="text"
-          value={selectedTodo?.title}
+          value={selectedTodo?.title ?? ""}
           onChange={(e) => {
-            const newTodo = {
-              ...selectedTodo,
-              title: e.target.value,
-            };
-
-            setEditTodo(newTodo);
+            setEditTodo((prev) =>
+              prev ? { ...prev, title: e.target.value } : prev,
+            );
           }}
         />
 

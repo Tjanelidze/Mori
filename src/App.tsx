@@ -49,8 +49,6 @@ function App() {
 
   // TODO: implement edit mode
   const handleEdit = (todoId: string) => {
-    // if (todo.id === todoId) setIsEdit(true);
-
     const selectedTodo = todos.find((todo) => todo.id === todoId);
     setEditTodo(selectedTodo);
 
@@ -69,6 +67,10 @@ function App() {
     fetchTodos();
   }, []);
 
+  useEffect(() => {
+    console.log("second");
+  });
+
   return (
     <>
       <h1 className="text-3xl font-bold">Mori</h1>
@@ -78,8 +80,9 @@ function App() {
           <TodoItem
             key={todo.id}
             todo={todo}
-            editTodo={editTodo}
+            selectedTodo={editTodo}
             setEditTodo={setEditTodo}
+            setTodos={setTodos}
             onDelete={handleDelete}
             onEdit={handleEdit}
           />
