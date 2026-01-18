@@ -7,7 +7,9 @@ const { connectToDb } = require('./db/connection');
 const app = express();
 const port = process.env.PORT;
 
-app.use('/api', routes);
+app.use(express.json());
+
+app.use('/api/v1', routes);
 
 connectToDb().then(() => {
   app.listen(port, () => {
