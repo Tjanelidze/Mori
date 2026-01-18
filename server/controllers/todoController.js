@@ -12,7 +12,7 @@ const getAllTodos = async (_, res) => {
       },
     });
   } catch (err) {
-    res.status(404).json({
+    res.status(500).json({
       status: 'fail',
       message: err.message,
     });
