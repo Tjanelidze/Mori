@@ -1,8 +1,8 @@
 const Todo = require('../model/Todos');
 
-const getAllTodos = (req, res) => {
+const getAllTodos = async (_, res) => {
   try {
-    const todos = Todo.find();
+    const todos = await Todo.find();
 
     res.status(200).json({
       status: 'success',
