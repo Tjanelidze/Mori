@@ -56,7 +56,14 @@ const getTodo = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(404).json({
+    if (err.name === 'CastError') {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid ID format',
+      });
+    }
+
+    res.status(400).json({
       status: 'fail',
       message: err.message,
     });
@@ -70,6 +77,13 @@ const updateTodo = async (req, res) => {
       new: true,
       runValidators: true,
     });
+
+    if (!updatedTodo) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No todo found with that ID',
+      });
+    }
 
     res.status(200).json({
       status: 'success',
@@ -111,6 +125,13 @@ const deleteTodo = async (req, res) => {
       data: null,
     });
   } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid ID format',
+      });
+    }
+
     res.status(400).json({
       status: 'fail',
       message: err.message,
