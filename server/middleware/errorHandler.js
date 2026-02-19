@@ -1,29 +1,53 @@
+const AppError = require("../utils/appError");
+
+const handleCastErrorDB = err => {
+    const message = `Invalid ${err.path}: ${err.value}.`;
+    return new AppError(message, 400);
+};
+
+const sendErrorDev = (err, res) => {
+    res.status(err.statusCode).json({
+        status: err.status,
+        error: err,
+        message: err.message,
+        stack: err.stack
+    });
+};
+
+const sendErrorProd = (err, res) => {
+    if (err.isOperational) {
+        res.status(err.statusCode).json({
+            status: err.status,
+            message: err.message
+        });
+    } else {
+        console.error('ERROR 💥', err);
+
+        res.status(500).json({
+            status: 'error',
+            message: 'Something went very wrong!'
+        });
+    }
+
+
+};
+
 const errorHandler = async (err, req, res, next) => {
     console.error("Global error handler caught: ", err); // For immediate server visibility
 
-    const errorDetails = {
-        message: err.message,
-        stack: err.stack,
-        route: req.originalUrl,
-        method: req.method,
-        time: new Date(),
-    };
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || 'error';
 
-    // Log error details to the console for development/debugging
-    console.log("Error details from middleware:", JSON.stringify(errorDetails, null, 2));
+    if (process.env.NODE_ENV === 'development') {
+        sendErrorDev(err, res);
+    } else if (process.env.NODE_ENV === 'production') {
+        let error = {...err};
+        error.message = err.message;
 
-    // Check if headers have already been sent to avoid "Can't set headers after they are sent" errors
-    if (res.headersSent) {
-        return next(err); // Pass to default Express error handler if response already started
+        if (err.name === 'CastError') error = handleCastErrorDB(err);
+
+        sendErrorProd(error, res);
     }
-
-    // Determine the appropriate status code and message for the client
-    const statusCode = err.statusCode || 500; // Custom errors might have a statusCode property
-    const message = err.message || 'Internal Server Error';
-
-    // Send a generic, user-friendly error response to the client
-    res.status(statusCode).json({success: false, message});
-    // Note: We don't call next() here unless we explicitly want another error handler to run.
 };
 
 module.exports = errorHandler;

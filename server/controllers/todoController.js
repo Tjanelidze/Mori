@@ -1,5 +1,6 @@
 const Todo = require('../model/Todos');
 const {PAGINATION_DEFAULTS} = require("./constants/constants");
+const AppError = require("../utils/appError");
 
 const getAllTodos = async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page) || PAGINATION_DEFAULTS.DEFAULT_PAGE);
@@ -18,123 +19,70 @@ const getAllTodos = async (req, res) => {
 };
 
 const createTodo = async (req, res) => {
-    try {
-        const newTodo = await Todo.create(req.body);
+    const newTodo = await Todo.create(req.body);
 
-        res.status(201).json({
-            status: 'success',
-            data: {
-                todo: newTodo,
-            },
-        });
-    } catch (err) {
-        res.status(400).json({
-            status: 'fail',
-            message: err.message,
-        });
-    }
+    res.status(201).json({
+        status: 'success',
+        data: {
+            todo: newTodo,
+        },
+    });
+
 };
 
-const getTodo = async (req, res) => {
-    try {
-        const id = req.params.id;
-        const todo = await Todo.findById(id);
+const getTodo = async (req, res, next) => {
 
-        if (!todo) {
-            return res.status(404).json({
-                status: 'fail',
-                message: 'No todo found with that ID',
-            });
-        }
+    const id = req.params.id;
+    const todo = await Todo.findById(id);
 
-        res.status(200).json({
-            status: 'success',
-            data: {
-                todo,
-            },
-        });
-    } catch (err) {
-        if (err.name === 'CastError') {
-            return res.status(400).json({
-                status: 'fail',
-                message: 'Invalid ID format',
-            });
-        }
-
-        res.status(400).json({
-            status: 'fail',
-            message: err.message,
-        });
+    if (!todo) {
+        return next(new AppError('No todo found with that ID', 404));
     }
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            todo,
+        },
+    });
+
 };
 
 const updateTodo = async (req, res) => {
-    try {
-        const id = req.params.id;
-        const updatedTodo = await Todo.findByIdAndUpdate(id, req.body, {
-            new: true,
-            runValidators: true,
-        });
+    const id = req.params.id;
+    const updatedTodo = await Todo.findByIdAndUpdate(id, req.body, {
+        new: true,
+        runValidators: true,
+    });
 
-        if (!updatedTodo) {
-            return res.status(404).json({
-                status: 'fail',
-                message: 'No todo found with that ID',
-            });
-        }
-
-        res.status(200).json({
-            status: 'success',
-            data: {
-                todo: updatedTodo,
-            },
-        });
-    } catch (err) {
-        if (err.name === 'CastError') {
-            return res.status(400).json({
-                status: 'fail',
-                message: 'Invalid ID format',
-            });
-        }
-
-        res.status(400).json({
-            status: 'fail',
-            message: err.message,
-        });
+    if (!updatedTodo) {
+        return next(new AppError('No todo found with that ID', 404));
     }
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            todo: updatedTodo,
+        },
+    });
 };
 
 const deleteTodo = async (req, res) => {
-    try {
-        const id = req.params.id;
-        const todo = await Todo.findById(id);
 
-        if (!todo) {
-            return res.status(404).json({
-                status: 'fail',
-                message: 'No todo found with that ID',
-            });
-        }
+    const id = req.params.id;
+    const todo = await Todo.findById(id);
 
-        await Todo.findByIdAndDelete(id);
-
-        res.status(204).json({
-            status: 'success',
-            data: null,
-        });
-    } catch (err) {
-        if (err.name === 'CastError') {
-            return res.status(400).json({
-                status: 'fail',
-                message: 'Invalid ID format',
-            });
-        }
-
-        res.status(400).json({
-            status: 'fail',
-            message: err.message,
-        });
+    if (!todo) {
+        return next(new AppError('No todo found with that ID', 404));
     }
+
+    await Todo.findByIdAndDelete(id);
+
+    res.status(204).json({
+        status: 'success',
+        data: null,
+    });
+
 };
 
 module.exports = {getAllTodos, createTodo, updateTodo, deleteTodo, getTodo};
