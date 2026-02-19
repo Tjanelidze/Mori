@@ -38,10 +38,14 @@ const errorHandler = async (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
     err.status = err.status || 'error';
 
+    if (res.headersSent) {
+        next(err);
+    }
+
     if (process.env.NODE_ENV === 'development') {
         sendErrorDev(err, res);
     } else if (process.env.NODE_ENV === 'production') {
-        let error = {...err};
+        let error = Object.assign(err);
         error.message = err.message;
 
         if (err.name === 'CastError') error = handleCastErrorDB(err);

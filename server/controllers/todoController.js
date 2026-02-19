@@ -9,7 +9,7 @@ const getAllTodos = async (req, res) => {
 
     const todos = await Todo.find().lean().skip(startIndex).limit(Math.min(limit, PAGINATION_DEFAULTS.MAX_LIMIT));
 
-    res.status(200).json({
+    return res.status(200).json({
         status: 'success',
         results: todos.length,
         data: {
@@ -21,7 +21,7 @@ const getAllTodos = async (req, res) => {
 const createTodo = async (req, res) => {
     const newTodo = await Todo.create(req.body);
 
-    res.status(201).json({
+    return res.status(201).json({
         status: 'success',
         data: {
             todo: newTodo,
@@ -39,7 +39,7 @@ const getTodo = async (req, res, next) => {
         return next(new AppError('No todo found with that ID', 404));
     }
 
-    res.status(200).json({
+    return res.status(200).json({
         status: 'success',
         data: {
             todo,
@@ -59,7 +59,7 @@ const updateTodo = async (req, res) => {
         return next(new AppError('No todo found with that ID', 404));
     }
 
-    res.status(200).json({
+    return res.status(200).json({
         status: 'success',
         data: {
             todo: updatedTodo,
@@ -78,7 +78,7 @@ const deleteTodo = async (req, res) => {
 
     await Todo.findByIdAndDelete(id);
 
-    res.status(204).json({
+    return res.status(204).json({
         status: 'success',
         data: null,
     });
