@@ -4,7 +4,7 @@
   "description": "Mori app API",
   "main": "app.js",
   "scripts": {
-    "start:dev": "nodemon app.js"
+    "dev": "nodemon app.js"
   },
   "author": "Tedo",
   "license": "ISC",
