@@ -51,6 +51,8 @@ const errorHandler = async (err, req, res, next) => {
         if (err.name === 'CastError') error = handleCastErrorDB(err);
 
         sendErrorProd(error, res);
+    } else {
+        sendErrorDev(err, res); // fallback: treat unknown env as development
     }
 };
 

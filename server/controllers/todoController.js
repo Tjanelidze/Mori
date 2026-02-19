@@ -4,7 +4,8 @@ const AppError = require("../utils/appError");
 
 const getAllTodos = async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page) || PAGINATION_DEFAULTS.DEFAULT_PAGE);
-    const limit = Math.max(1, parseInt(req.query.limit) || PAGINATION_DEFAULTS.DEFAULT_LIMIT);
+    const rawLimit = Math.max(1, parseInt(req.query.limit) || PAGINATION_DEFAULTS.DEFAULT_LIMIT);
+    const limit = Math.min(rawLimit, PAGINATION_DEFAULTS.MAX_LIMIT);
     const startIndex = (page - 1) * limit;
 
     const todos = await Todo.find().lean().skip(startIndex).limit(Math.min(limit, PAGINATION_DEFAULTS.MAX_LIMIT));
@@ -48,7 +49,7 @@ const getTodo = async (req, res, next) => {
 
 };
 
-const updateTodo = async (req, res) => {
+const updateTodo = async (req, res, next) => {
     const id = req.params.id;
     const updatedTodo = await Todo.findByIdAndUpdate(id, req.body, {
         new: true,
@@ -67,7 +68,7 @@ const updateTodo = async (req, res) => {
     });
 };
 
-const deleteTodo = async (req, res) => {
+const deleteTodo = async (req, res, next) => {
 
     const id = req.params.id;
     const todo = await Todo.findById(id);
