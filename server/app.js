@@ -4,6 +4,7 @@ const routes = require('./routes');
 
 const {connectToDb} = require('./db/connection');
 const errorHandler = require("./middleware/errorHandler");
+const shutdown = require("./utils/shutdown");
 
 const app = express();
 const port = process.env.PORT;
@@ -26,14 +27,6 @@ connectToDb().then(() => {
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-    
-    if (server) {
-        const forceExit = setTimeout(() => process.exit(1), 10_000).unref();
-        server.close(() => {
-            clearTimeout(forceExit);
-            process.exit(1);
-        });
-    } else {
-        process.exit(1);
-    }
+
+    shutdown('unhandledRejection', server);
 });
