@@ -25,8 +25,14 @@ connectToDb().then(() => {
 });
 
 process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    
     if (server) {
-        server.close(() => process.exit(1));
+        const forceExit = setTimeout(() => process.exit(1), 10_000).unref();
+        server.close(() => {
+            clearTimeout(forceExit);
+            process.exit(1);
+        });
     } else {
         process.exit(1);
     }
