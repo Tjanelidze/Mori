@@ -7,7 +7,6 @@ const getAllTodos = async (req, res) => {
     const rawLimit = Math.max(1, parseInt(req.query.limit) || PAGINATION_DEFAULTS.DEFAULT_LIMIT);
     const limit = Math.min(rawLimit, PAGINATION_DEFAULTS.MAX_LIMIT);
     const startIndex = (page - 1) * limit;
-
     const todos = await Todo.find().lean().skip(startIndex).limit(Math.min(limit, PAGINATION_DEFAULTS.MAX_LIMIT));
 
     return res.status(200).json({
