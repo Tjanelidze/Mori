@@ -1,12 +1,12 @@
-function shutdown(signal, server) {
+function shutdown(signal, server, exitcode = 1) {
     console.log(`Received ${signal}, shutting down gracefully.`);
-    const forceExit = setTimeout(() => process.exit(1), 10_000).unref();
+    const forceExit = setTimeout(() => process.exit(exitcode), 10_000).unref();
     server
         ? server.close(() => {
             clearTimeout(forceExit);
-            process.exit(0);
+            process.exit(exitcode);
         })
-        : process.exit(0);
+        : process.exit(exitcode);
 }
 
 module.exports = shutdown;
