@@ -60,13 +60,13 @@ const errorHandler = (
 
 
     if (res.headersSent) {
-        next(errorInstance);
+        return next(errorInstance);
     }
 
     if (process.env.NODE_ENV === 'development') {
         sendErrorDev(errorInstance, res);
     } else if (process.env.NODE_ENV === 'production') {
-        let prodError = Object.assign(errorInstance);
+        let prodError: AppError | Error = errorInstance;
         prodError.message = errorInstance.message;
 
         if (isCastError(errorInstance)) prodError = handleCastErrorDB(errorInstance);

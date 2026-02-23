@@ -3,10 +3,10 @@ import dotenv from 'dotenv';
 import {Server} from "node:http";
 
 import routes from './routes/index.js';
-import shutdown from "./utils/shutdown";
 
 import connectToDb from "db/connection.js";
-import errorHandler from "./middleware/errorHandler";
+import shutdown from "./utils/shutdown.js";
+import errorHandler from "./middleware/errorHandler.js";
 
 
 dotenv.config();
