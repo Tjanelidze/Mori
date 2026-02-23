@@ -1,13 +1,19 @@
-const Todo = require('../model/Todos');
-const {PAGINATION_DEFAULTS} = require("./constants/constants");
-const AppError = require("../utils/appError");
+import Todo from '../model/Todos';
+import {PAGINATION_DEFAULTS} from './constants/constants';
+import AppError from '../utils/AppError.js';
+import {NextFunction, Request, Response} from 'express';
 
-const getAllTodos = async (req, res) => {
-    const page = Math.max(1, parseInt(req.query.page) || PAGINATION_DEFAULTS.DEFAULT_PAGE);
-    const rawLimit = Math.max(1, parseInt(req.query.limit) || PAGINATION_DEFAULTS.DEFAULT_LIMIT);
-    const limit = Math.min(rawLimit, PAGINATION_DEFAULTS.MAX_LIMIT);
+const getAllTodos = async (req: Request, res: Response): Promise<Response | void> => {
+    const page = Math.max(1, parseInt(req.query.page as string) || PAGINATION_DEFAULTS.DEFAULT_PAGE);
+    const limit = Math.min(
+        Math.max(1, parseInt(req.query.limit as string) || PAGINATION_DEFAULTS.DEFAULT_LIMIT),
+        PAGINATION_DEFAULTS.MAX_LIMIT
+    );
     const startIndex = (page - 1) * limit;
-    const todos = await Todo.find().lean().skip(startIndex).limit(Math.min(limit, PAGINATION_DEFAULTS.MAX_LIMIT));
+    const todos = await Todo.find()
+        .lean()
+        .skip(startIndex)
+        .limit(Math.min(limit, PAGINATION_DEFAULTS.MAX_LIMIT));
 
     return res.status(200).json({
         status: 'success',
@@ -18,7 +24,7 @@ const getAllTodos = async (req, res) => {
     });
 };
 
-const createTodo = async (req, res) => {
+const createTodo = async (req: Request, res: Response): Promise<Response | void> => {
     const newTodo = await Todo.create(req.body);
 
     return res.status(201).json({
@@ -27,11 +33,9 @@ const createTodo = async (req, res) => {
             todo: newTodo,
         },
     });
-
 };
 
-const getTodo = async (req, res, next) => {
-
+const getTodo = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     const id = req.params.id;
     const todo = await Todo.findById(id);
 
@@ -45,10 +49,9 @@ const getTodo = async (req, res, next) => {
             todo,
         },
     });
-
 };
 
-const updateTodo = async (req, res, next) => {
+const updateTodo = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     const id = req.params.id;
     const updatedTodo = await Todo.findByIdAndUpdate(id, req.body, {
         new: true,
@@ -67,8 +70,7 @@ const updateTodo = async (req, res, next) => {
     });
 };
 
-const deleteTodo = async (req, res, next) => {
-
+const deleteTodo = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     const id = req.params.id;
     const todo = await Todo.findById(id);
 
@@ -82,7 +84,6 @@ const deleteTodo = async (req, res, next) => {
         status: 'success',
         data: null,
     });
-
 };
 
-module.exports = {getAllTodos, createTodo, updateTodo, deleteTodo, getTodo};
+export {getAllTodos, createTodo, updateTodo, deleteTodo, getTodo};
