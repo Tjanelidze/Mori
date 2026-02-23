@@ -3,7 +3,7 @@
     "target": "es2016",
     "module": "nodenext",
     "rootDir": "./",
-    "moduleResolution": "nodenext",
+    "moduleResolution": "node10",
     "baseUrl": "./",
     "allowJs": true,
     "outDir": "./build",
