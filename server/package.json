@@ -2,9 +2,12 @@
   "name": "mori-app",
   "version": "1.0.0",
   "description": "Mori app API",
-  "main": "app.js",
+  "main": "build/app.js",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon app.js"
+    "dev": "tsx watch app.ts",
+    "build": "tsc",
+    "start": "node build/app.js"
   },
   "author": "Tedo",
   "license": "ISC",
@@ -14,6 +17,9 @@
     "mongoose": "^9.1.4"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.3.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }

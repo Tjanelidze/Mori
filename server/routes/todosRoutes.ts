@@ -1,8 +1,9 @@
-const express = require('express');
+import express from "express";
+import * as todoController from "../controllers/todoController.js";
+import catchAsync from "../utils/catchAsync.js";
+
 const router = express.Router();
 
-const todoController = require('../controllers/todoController');
-const catchAsync = require("../utils/catchAsync");
 
 router.get('/', catchAsync(todoController.getAllTodos));
 router.post('/', catchAsync(todoController.createTodo));
@@ -10,4 +11,4 @@ router.get('/:id', catchAsync(todoController.getTodo));
 router.patch('/:id', catchAsync(todoController.updateTodo));
 router.delete('/:id', catchAsync(todoController.deleteTodo));
 
-module.exports = router;
+export default router;
