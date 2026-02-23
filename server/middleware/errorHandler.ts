@@ -1,5 +1,5 @@
 import AppError from '../utils/AppError.js';
-import {NextFunction, Response} from 'express';
+import {NextFunction, Request, Response} from 'express';
 
 interface MongoCastError extends Error {
     path: string;
@@ -49,12 +49,12 @@ const sendErrorProd = (err: AppError | Error, res: Response) => {
 };
 
 const errorHandler = (
-    err: unknown,
+    err: Error,
     req: Request,
     res: Response,
     next: NextFunction,
 ) => {
-    const errorInstance = err instanceof Error ? err : new Error(String(err));
+    const errorInstance = err ? err : new Error(String(err));
 
     console.error('Global error handler caught: ', err); // For immediate server visibility
 

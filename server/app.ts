@@ -4,8 +4,9 @@ import {Server} from "node:http";
 
 import routes from './routes/index.js';
 import shutdown from "./utils/shutdown";
-import errorHandler from "middleware/errorHandler";
+
 import connectToDb from "db/connection.js";
+import errorHandler from "./middleware/errorHandler";
 
 
 dotenv.config();
