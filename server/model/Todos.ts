@@ -1,15 +1,15 @@
-import mongoose from "mongoose";
+import {model, Schema} from "mongoose";
 
-// interface ITodo {
-//   title: string,
-//       isFinished: boolean,
-//       reps: number,
-//       priority: "low" | "medium" | 'high',
-//       createdAt: Date
-// }
+interface ITodo {
+    title: string,
+    isFinished: boolean,
+    reps: number,
+    priority: "low" | "medium" | 'high',
+    createdAt: Date
+}
 
 
-const todoSchema = new mongoose.Schema({
+const todoSchema = new Schema<ITodo>({
     title: {
         type: String,
         required: [true, 'A todo must have a title'],
@@ -33,6 +33,6 @@ const todoSchema = new mongoose.Schema({
     },
 });
 
-const Todo = mongoose.model('todos', todoSchema);
+const Todo = model<ITodo>('todos', todoSchema);
 
 export default Todo;
