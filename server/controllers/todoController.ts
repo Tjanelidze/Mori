@@ -1,7 +1,7 @@
-import Todo from '../model/Todos';
-import {PAGINATION_DEFAULTS} from './constants/constants';
 import AppError from '../utils/AppError.js';
 import {NextFunction, Request, Response} from 'express';
+import {PAGINATION_DEFAULTS} from "./constants/constants.js";
+import Todo from "../model/Todos.js";
 
 const getAllTodos = async (req: Request, res: Response): Promise<Response | void> => {
     const page = Math.max(1, parseInt(req.query.page as string) || PAGINATION_DEFAULTS.DEFAULT_PAGE);
