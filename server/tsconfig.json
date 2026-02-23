@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "target": "es2016",
-    "module": "commonjs",
+    "module": "nodenext",
     "rootDir": "./",
-    "moduleResolution": "node10",
+    "moduleResolution": "nodenext",
     "baseUrl": "./",
     "allowJs": true,
     "outDir": "./build",

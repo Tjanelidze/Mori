@@ -25,6 +25,10 @@ const todoSchema = new Schema<ITodo>({
     },
     priority: {
         type: String,
+        enum: {
+            values: ['low', 'medium', 'high'],
+            message: 'Priority must be low, medium, or high',
+        },
         default: 'low'
     },
     createdAt: {
