@@ -1,6 +1,6 @@
 import {model, Schema} from "mongoose";
 
-interface ITodo {
+export interface ITodo {
     title: string,
     isFinished: boolean,
     reps: number,
@@ -21,6 +21,7 @@ const todoSchema = new Schema<ITodo>({
     },
     reps: {
         type: Number,
+        min: [1, "Repetitions cannot be less than 1"],
         default: 1,
     },
     priority: {

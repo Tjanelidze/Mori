@@ -2,6 +2,7 @@ import AppError from '../utils/AppError.js';
 import {NextFunction, Request, Response} from 'express';
 import {PAGINATION_DEFAULTS} from "./constants/constants.js";
 import Todo from "../model/Todos.js";
+import cleanQuery from "../utils/cleanQuery.js";
 
 const getAllTodos = async (req: Request, res: Response): Promise<Response | void> => {
     const page = Math.max(1, parseInt(req.query.page as string) || PAGINATION_DEFAULTS.DEFAULT_PAGE);
@@ -10,22 +11,32 @@ const getAllTodos = async (req: Request, res: Response): Promise<Response | void
         PAGINATION_DEFAULTS.MAX_LIMIT
     );
     const startIndex = (page - 1) * limit;
-    const todos = await Todo.find()
+    const queryObject = {
+        title: req.query.title ? {$regex: String(req.query.title), $options: 'i'} : undefined,
+        priority: typeof req.query.priority === 'string' ? req.query.priority : undefined,
+        isFinished: req.query.isFinished !== undefined ? req.query.isFininished === 'true' : undefined,
+    }
+    const query = cleanQuery(queryObject);
+    const paginationLimit = Math.min(limit, PAGINATION_DEFAULTS.MAX_LIMIT);
+
+    const [totalResults, todos] = await Promise.all([Todo.countDocuments(query), Todo.find(query)
         .lean()
         .skip(startIndex)
-        .limit(Math.min(limit, PAGINATION_DEFAULTS.MAX_LIMIT));
+        .limit(paginationLimit)])
 
     return res.status(200).json({
         status: 'success',
         results: todos.length,
+        totalResults,
         data: {
             todos,
-        },
+        }
     });
 };
 
 const createTodo = async (req: Request, res: Response): Promise<Response | void> => {
-    const newTodo = await Todo.create(req.body);
+    const {title, reps, priority} = req.body;
+    const newTodo = await Todo.create({title, reps, priority});
 
     return res.status(201).json({
         status: 'success',
@@ -53,7 +64,8 @@ const getTodo = async (req: Request, res: Response, next: NextFunction): Promise
 
 const updateTodo = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     const id = req.params.id;
-    const updatedTodo = await Todo.findByIdAndUpdate(id, req.body, {
+    const {title, reps, priority} = req.body
+    const updatedTodo = await Todo.findByIdAndUpdate(id, {title, reps, priority}, {
         new: true,
         runValidators: true,
     });
@@ -72,13 +84,11 @@ const updateTodo = async (req: Request, res: Response, next: NextFunction): Prom
 
 const deleteTodo = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     const id = req.params.id;
-    const todo = await Todo.findById(id);
+    const todo = await Todo.findByIdAndDelete(id);
 
     if (!todo) {
         return next(new AppError('No todo found with that ID', 404));
     }
-
-    await Todo.findByIdAndDelete(id);
 
     return res.status(204).json({
         status: 'success',
