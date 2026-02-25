@@ -2,7 +2,7 @@ import AppError from '../utils/AppError.js';
 import {NextFunction, Request, Response} from 'express';
 import {PAGINATION_DEFAULTS} from "./constants/constants.js";
 import Todo from "../model/Todos.js";
-import cleanQuery from "../utils/cleanQuery";
+import cleanQuery from "../utils/cleanQuery.js";
 
 const getAllTodos = async (req: Request, res: Response): Promise<Response | void> => {
     const page = Math.max(1, parseInt(req.query.page as string) || PAGINATION_DEFAULTS.DEFAULT_PAGE);
@@ -12,9 +12,9 @@ const getAllTodos = async (req: Request, res: Response): Promise<Response | void
     );
     const startIndex = (page - 1) * limit;
     const queryObject = {
-        title: req.query.title ? new RegExp(String(req.query.title), 'i') : undefined,
-        priority: req.query.priority,
-        isFinished: req.query.isFinished === 'true',
+        title: req.query.title ? {$regex: String(req.query.title), $options: 'i'} : undefined,
+        priority: typeof req.query.priority === 'string' ? req.query.priority : undefined,
+        isFinished: req.query.isFinished !== undefined ? req.query.isFininished === 'true' : undefined,
     }
     const query = cleanQuery(queryObject);
     const paginationLimit = Math.min(limit, PAGINATION_DEFAULTS.MAX_LIMIT);
