@@ -1,17 +1,6 @@
 import {Document, model, Schema} from 'mongoose';
 import bcrypt from 'bcrypt';
-
-interface IUser {
-    username: string;
-    email: string;
-    photo?: string;
-    password: string;
-    confirmPassword?: string;
-}
-
-interface IUserMethods {
-    correctPassword(candidatePassword: string, userPassword: string): Promise<boolean>;
-}
+import {IUser, IUserMethods} from "../interfaces/user.interface";
 
 type UserDocument = IUser & IUserMethods & Document;
 

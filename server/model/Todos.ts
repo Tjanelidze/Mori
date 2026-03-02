@@ -1,13 +1,5 @@
 import {model, Schema} from "mongoose";
-
-export interface ITodo {
-    title: string,
-    isFinished: boolean,
-    reps: number,
-    priority: "low" | "medium" | 'high',
-    createdAt: Date
-}
-
+import {ITodo} from "../interfaces/todo.interface";
 
 const todoSchema = new Schema<ITodo>({
     title: {
