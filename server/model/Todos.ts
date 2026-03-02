@@ -31,12 +31,8 @@ const todoSchema = new Schema<ITodo>({
             message: 'Priority must be low, medium, or high',
         },
         default: 'low'
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-});
+    }
+}, {timestamps: true});
 
 const Todo = model<ITodo>('todos', todoSchema);
 
