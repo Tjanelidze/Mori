@@ -5,6 +5,7 @@ async function connectToDb() {
 
     try {
         await mongoose.connect(uri);
+        await mongoose.connection.syncIndexes();
     } catch (err: unknown) {
 
         if (err instanceof Error) {

@@ -6,6 +6,22 @@ interface MongoCastError extends Error {
     value: string;
 }
 
+interface MongoDuplicateKeyError extends Error {
+    code: number;
+    keyValue: Record<string, string>;
+}
+
+function isDuplicateKeyError(err: unknown): err is MongoDuplicateKeyError {
+    return (err as MongoDuplicateKeyError).code === 11000;
+}
+
+const handleDuplicateKeyErrorDB = (err: MongoDuplicateKeyError): AppError => {
+    const field = Object.keys(err.keyValue)[0];
+    const value = err.keyValue[field];
+    const message = `Duplicate value "${value}" for field "${field}". Please use a different value.`;
+    return new AppError(message, 409);
+};
+
 function isAppError(err: unknown): err is AppError {
     return err instanceof AppError;
 }
@@ -70,6 +86,8 @@ const errorHandler = (
         prodError.message = errorInstance.message;
 
         if (isCastError(errorInstance)) prodError = handleCastErrorDB(errorInstance);
+        if (isCastError(errorInstance)) prodError = handleCastErrorDB(errorInstance);
+        if (isDuplicateKeyError(errorInstance)) prodError = handleDuplicateKeyErrorDB(errorInstance);
 
         sendErrorProd(prodError, res);
     } else {
