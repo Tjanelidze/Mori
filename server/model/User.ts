@@ -2,7 +2,8 @@ import {Document, model, Schema} from 'mongoose';
 import bcrypt from 'bcrypt';
 import {IUser, IUserMethods} from "../interfaces/user.interface";
 
-type UserDocument = IUser & IUserMethods & Document;
+export type UserDocument = IUser & IUserMethods & Document;
+const emailValidator = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const userSchema = new Schema<UserDocument>({
     username: {
@@ -16,6 +17,12 @@ const userSchema = new Schema<UserDocument>({
         lowercase: true,
         unique: true,
         trim: true,
+        validate: {
+            validator: function (val: string): boolean {
+                return emailValidator.test(val);
+            },
+            message: 'Please provide a valid email address',
+        }
     },
     photo: {
         type: String,
@@ -25,20 +32,22 @@ const userSchema = new Schema<UserDocument>({
         type: String,
         required: [true, 'A user must provide a password'],
         minlength: [8, 'Minimum length is 8'],
-        trim: true,
         select: false,
     },
     confirmPassword: {
         type: String,
-        required: [true, 'Please confirm the password'],
+        required: [function (this: UserDocument) {
+            return this.isNew || this.isModified('password');
+        }, 'Please confirm the password'],
         minlength: [8, 'Minimum length is 8'],
-        trim: true,
         select: false,
         validate: {
             validator: function (val: string): boolean {
-                return val === (this as UserDocument).password;
+                const doc = (this as UserDocument);
+                if (!(doc.isNew || doc.isModified('password'))) return true;
+                return val === doc.password;
             },
-            message: "Passwords doesn't match!",
+            message: "Passwords do not match!",
         },
     },
 
@@ -54,6 +63,12 @@ userSchema.pre('save', async function () {
 
 userSchema.methods.correctPassword = async function (candidatePassword: string, userPassword: string) {
     return bcrypt.compare(candidatePassword, userPassword)
+}
+
+userSchema.methods.toJSON = function (): Omit<UserDocument, 'password'> {
+    const {password: _password, ...userObject} = this.toObject();
+
+    return userObject;
 }
 
 const User = model<UserDocument>('users', userSchema);
