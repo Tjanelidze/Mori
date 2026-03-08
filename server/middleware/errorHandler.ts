@@ -12,12 +12,19 @@ interface MongoDuplicateKeyError extends Error {
 }
 
 function isDuplicateKeyError(err: unknown): err is MongoDuplicateKeyError {
-    return (err as MongoDuplicateKeyError).code === 11000;
+    return (
+        typeof err === 'object' &&
+        err !== null &&
+        'code' in err &&
+        'keyValue' in err &&
+        (err as { code?: unknown }).code === 11000 &&
+        typeof (err as { keyValue?: unknown }).keyValue === 'object' &&
+        (err as { keyValue?: unknown }).keyValue !== null
+    );
 }
 
 const handleDuplicateKeyErrorDB = (err: MongoDuplicateKeyError): AppError => {
-    const field = Object.keys(err.keyValue)[0];
-    const value = err.keyValue[field];
+    const [field, value] = Object.entries(err.keyValue)[0] ?? ['field', 'value'];
     const message = `Duplicate value "${value}" for field "${field}". Please use a different value.`;
     return new AppError(message, 409);
 };
@@ -84,7 +91,7 @@ const errorHandler = (
     } else if (process.env.NODE_ENV === 'production') {
         let prodError: AppError | Error = errorInstance;
         prodError.message = errorInstance.message;
-        
+
         if (isCastError(errorInstance)) prodError = handleCastErrorDB(errorInstance);
         if (isDuplicateKeyError(errorInstance)) prodError = handleDuplicateKeyErrorDB(errorInstance);
 
