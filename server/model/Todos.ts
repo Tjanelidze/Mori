@@ -1,13 +1,5 @@
 import {model, Schema} from "mongoose";
-
-export interface ITodo {
-    title: string,
-    isFinished: boolean,
-    reps: number,
-    priority: "low" | "medium" | 'high',
-    createdAt: Date
-}
-
+import {ITodo} from "../interfaces/todo.interface";
 
 const todoSchema = new Schema<ITodo>({
     title: {
@@ -31,12 +23,8 @@ const todoSchema = new Schema<ITodo>({
             message: 'Priority must be low, medium, or high',
         },
         default: 'low'
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-});
+    }
+}, {timestamps: true});
 
 const Todo = model<ITodo>('todos', todoSchema);
 
