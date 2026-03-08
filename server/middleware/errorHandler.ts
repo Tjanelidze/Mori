@@ -84,8 +84,7 @@ const errorHandler = (
     } else if (process.env.NODE_ENV === 'production') {
         let prodError: AppError | Error = errorInstance;
         prodError.message = errorInstance.message;
-
-        if (isCastError(errorInstance)) prodError = handleCastErrorDB(errorInstance);
+        
         if (isCastError(errorInstance)) prodError = handleCastErrorDB(errorInstance);
         if (isDuplicateKeyError(errorInstance)) prodError = handleDuplicateKeyErrorDB(errorInstance);
 
