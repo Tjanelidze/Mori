@@ -14,7 +14,8 @@ const getAllTodos = async (req: Request, res: Response): Promise<Response | void
     const queryObject = {
         title: req.query.title ? {$regex: String(req.query.title), $options: 'i'} : undefined,
         priority: typeof req.query.priority === 'string' ? req.query.priority : undefined,
-        isFinished: req.query.isFinished !== undefined ? req.query.isFininished === 'true' : undefined,
+        isFinished: req.query.isFinished !== undefined ? req.query.isFinished === 'true' : undefined,
+        user: req.user!._id
     }
     const query = cleanQuery(queryObject);
     const paginationLimit = Math.min(limit, PAGINATION_DEFAULTS.MAX_LIMIT);
@@ -36,7 +37,8 @@ const getAllTodos = async (req: Request, res: Response): Promise<Response | void
 
 const createTodo = async (req: Request, res: Response): Promise<Response | void> => {
     const {title, reps, priority} = req.body;
-    const newTodo = await Todo.create({title, reps, priority});
+    const userId = req.user._id;
+    const newTodo = await Todo.create({title, reps, priority, user: userId});
 
     return res.status(201).json({
         status: 'success',
@@ -48,7 +50,7 @@ const createTodo = async (req: Request, res: Response): Promise<Response | void>
 
 const getTodo = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     const id = req.params.id;
-    const todo = await Todo.findById(id);
+    const todo = await Todo.findOne({_id: id, user: req.user._id});
 
     if (!todo) {
         return next(new AppError('No todo found with that ID', 404));
@@ -65,7 +67,7 @@ const getTodo = async (req: Request, res: Response, next: NextFunction): Promise
 const updateTodo = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     const id = req.params.id;
     const {title, reps, priority} = req.body
-    const updatedTodo = await Todo.findByIdAndUpdate(id, {title, reps, priority}, {
+    const updatedTodo = await Todo.findOneAndUpdate({_id: id, user: req.user._id}, {title, reps, priority}, {
         new: true,
         runValidators: true,
     });
@@ -84,7 +86,7 @@ const updateTodo = async (req: Request, res: Response, next: NextFunction): Prom
 
 const deleteTodo = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     const id = req.params.id;
-    const todo = await Todo.findByIdAndDelete(id);
+    const todo = await Todo.findOneAndDelete({_id: id, user: req.user._id});
 
     if (!todo) {
         return next(new AppError('No todo found with that ID', 404));
