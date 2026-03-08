@@ -5,7 +5,8 @@ import * as authController from '../controllers/authController'
 
 const router = express.Router();
 
-router.post("/", catchAsync(authController.signup))
+router.post("/signup", catchAsync(authController.signup))
+router.post("/login", catchAsync(authController.login))
 
 
 export default router;
