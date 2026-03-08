@@ -23,6 +23,11 @@ const todoSchema = new Schema<ITodo>({
             message: 'Priority must be low, medium, or high',
         },
         default: 'low'
+    },
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: 'users',
+        required: [true, 'A todo must belong to a user']
     }
 }, {timestamps: true});
 
