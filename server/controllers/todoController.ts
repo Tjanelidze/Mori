@@ -15,7 +15,7 @@ const getAllTodos = async (req: Request, res: Response): Promise<Response | void
         title: req.query.title ? {$regex: String(req.query.title), $options: 'i'} : undefined,
         priority: typeof req.query.priority === 'string' ? req.query.priority : undefined,
         isFinished: req.query.isFinished !== undefined ? req.query.isFinished === 'true' : undefined,
-        user: req.user._id
+        user: req.user!._id
     }
     const query = cleanQuery(queryObject);
     const paginationLimit = Math.min(limit, PAGINATION_DEFAULTS.MAX_LIMIT);
