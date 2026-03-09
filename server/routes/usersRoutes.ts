@@ -18,7 +18,6 @@ const limiter = rateLimit({
 
 router.post("/signup", catchAsync(authController.signup))
 router.post("/login", limiter, catchAsync(authController.login))
-router.post("/forgotPassword", limiter, catchAsync(authController.login))
 
 
 export default router;

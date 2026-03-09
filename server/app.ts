@@ -21,7 +21,7 @@ const limiter = rateLimit({
     limit: 100,
     message: {
         status: 'fail',
-        message: 'Too many login attempts from this IP, please try again after 15 minutes'
+        message: 'Too many requests from this IP, please try again after 15 minutes'
     },
     standardHeaders: 'draft-8',
     legacyHeaders: false,
