@@ -1,4 +1,4 @@
-import jwt, {TokenExpiredError} from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import {env} from '../config/env';
 import {NextFunction, Request, Response} from 'express';
 import AppError from "../utils/AppError";
@@ -22,7 +22,7 @@ const authMiddleware = async function (
     try {
         decoded = jwt.verify(token, env.jwtSecret) as { id: string };
     } catch (err) {
-        if (err instanceof TokenExpiredError) {
+        if (err instanceof jwt.TokenExpiredError) {
             return next(new AppError('Your token has expired. Please log in again.', 401));
         }
         return next(new AppError('Invalid token. Please log in again.', 401));
