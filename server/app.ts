@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import {Server} from "node:http";
+import {rateLimit} from 'express-rate-limit'
 
 import routes from './routes/index.js';
 
@@ -15,8 +16,20 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT;
 let server: Server;
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
+    message: {
+        status: 'fail',
+        message: 'Too many login attempts from this IP, please try again after 15 minutes'
+    },
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    ipv6Subnet: 56,
+})
 
 app.use(express.json());
+app.use(limiter)
 
 app.use('/api/v1', routes);
 
