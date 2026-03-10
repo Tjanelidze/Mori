@@ -4,6 +4,9 @@ export interface IUser {
     photo?: string;
     password: string;
     confirmPassword?: string;
+    passwordResetToken?: string;
+    passwordResetExpires?: number;
+
 }
 
 export interface IUserMethods {

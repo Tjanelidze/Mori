@@ -2,6 +2,10 @@ import {NextFunction, Request, Response} from "express";
 import User from "../model/User";
 import {signToken} from "../utils/signToken";
 import AppError from "../utils/AppError";
+import crypto from 'crypto'
+import bcrypt from "bcrypt";
+import Token from "../model/Token";
+import sendEmail from "../utils/email/sendEmail";
 
 const signup = async (req: Request, res: Response) => {
     const {username, email, password, confirmPassword} = req.body;
@@ -37,4 +41,92 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     })
 }
 
-export {signup, login}
+const requestResetPassword = async (req: Request, res: Response, next: NextFunction) => {
+    const {email} = req.body;
+    const user = await User.findOne({email});
+
+    if (!user) {
+        return next(new AppError("Incorrect email", 400));
+    }
+    const token = await Token.findOne({userId: user.get('id')})
+
+    if (token) {
+        await token.deleteOne();
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const bcryptSalt = await bcrypt.genSalt(12);
+    const hash = await bcrypt.hash(resetToken, Number(bcryptSalt));
+    user.passwordResetToken = hash;
+    user.passwordResetExpires = Date.now() + 1800000;
+
+    await new Token({
+        userId: user._id,
+        token: hash,
+        createdAt: Date.now(),
+    }).save();
+
+    const resetLink = `${process.env.CLIENT_URL}/resetPassword?token=${resetToken}&id=${user._id}`;
+
+
+    await sendEmail({
+        email: user.email,
+        subject: "Password Reset Request",
+        payload: {
+            name: user.username,
+            link: resetLink,
+            expiresIn: "30 minutes",
+        },
+        template: "requestResetPassword.hbs",
+    });
+
+    res.status(200).json({
+        success: true,
+        message: "Password reset link sent to your email",
+    });
+}
+
+const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+    const {userId, token, password} = req.body;
+    const passwordResetToken = await Token.findOne({userId});
+
+    if (!passwordResetToken) {
+        return next(new AppError("Invalid or expired password reset token", 400));
+    }
+
+    const isValid = await bcrypt.compare(token, passwordResetToken.token);
+
+    if (!isValid) {
+        return next(new AppError("Invalid or expired password reset token", 400));
+    }
+
+    const bcryptSalt = await bcrypt.genSalt(12);
+    const hash = await bcrypt.hash(password, Number(bcryptSalt));
+    await User.findByIdAndUpdate(
+        userId,
+        {password: hash},
+        {new: true}
+    );
+    const user = await User.findById(userId);
+
+    if (!user) {
+        return next(new AppError("Incorrect email", 400));
+    }
+
+    await sendEmail({
+        email: user.email,
+        subject: "Password Reset Successfully",
+        payload: {
+            name: user.username,
+        },
+        template: "resetPassword.hbs",
+    });
+    await passwordResetToken.deleteOne();
+
+    res.status(200).json({
+        success: true,
+        message: "Password rested successfully",
+    });
+}
+
+export {signup, login, requestResetPassword, resetPassword}
