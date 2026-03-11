@@ -109,6 +109,7 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
 
     user.password = password;
     await user.save();
+    await passwordResetToken.deleteOne();
 
     await sendEmail({
         email: user.email,
@@ -118,7 +119,6 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
         },
         template: "resetPassword.hbs",
     });
-    await passwordResetToken.deleteOne();
 
     res.status(200).json({
         success: true,
