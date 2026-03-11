@@ -41,12 +41,15 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     })
 }
 
-const requestResetPassword = async (req: Request, res: Response, next: NextFunction) => {
+const requestResetPassword = async (req: Request, res: Response) => {
     const {email} = req.body;
     const user = await User.findOne({email});
 
     if (!user) {
-        return next(new AppError("Incorrect email", 400));
+        return res.status(200).json({
+            success: true,
+            message: "If the account exists, a password reset link will be sent",
+        });
     }
     const token = await Token.findOne({userId: user.get('id')})
 
@@ -55,10 +58,7 @@ const requestResetPassword = async (req: Request, res: Response, next: NextFunct
     }
 
     const resetToken = crypto.randomBytes(32).toString("hex");
-    const bcryptSalt = await bcrypt.genSalt(12);
-    const hash = await bcrypt.hash(resetToken, Number(bcryptSalt));
-    user.passwordResetToken = hash;
-    user.passwordResetExpires = Date.now() + 1800000;
+    const hash = await bcrypt.hash(resetToken, process.env.BCRYPT_SALT!);
 
     await new Token({
         userId: user._id,
@@ -82,7 +82,7 @@ const requestResetPassword = async (req: Request, res: Response, next: NextFunct
 
     res.status(200).json({
         success: true,
-        message: "Password reset link sent to your email",
+        message: "If the account exists, a password reset link will be sent",
     });
 }
 

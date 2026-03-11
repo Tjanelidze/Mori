@@ -50,14 +50,6 @@ const userSchema = new Schema<UserDocument>({
             message: "Passwords do not match!",
         },
     },
-    passwordResetToken: {
-        type: String,
-        select: false,
-    },
-    passwordResetExpires: {
-        type: Number,
-        select: false,
-    }
 }, {timestamps: true})
 
 userSchema.pre('save', async function () {

@@ -12,7 +12,6 @@
   "author": "Tedo",
   "license": "ISC",
   "dependencies": {
-    "@types/nodemailer": "^7.0.11",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
@@ -23,6 +22,7 @@
     "nodemailer": "^8.0.2"
   },
   "devDependencies": {
+    "@types/nodemailer": "^7.0.11",
     "@eslint/js": "^10.0.1",
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",

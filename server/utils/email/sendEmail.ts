@@ -37,7 +37,7 @@ const sendEmail = async ({email, subject, payload, template}: SendEmailProps) =>
 
         return {success: true, info};
     } catch (e: unknown) {
-        return e;
+        throw e;
     }
 };
 
