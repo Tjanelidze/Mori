@@ -2,6 +2,13 @@ import {NextFunction, Request, Response} from "express";
 import User from "../model/User";
 import {signToken} from "../utils/signToken";
 import AppError from "../utils/AppError";
+import crypto from 'crypto'
+import bcrypt from "bcrypt";
+import Token from "../model/Token";
+import sendEmail from "../utils/email/sendEmail";
+import {env} from "../config/env";
+import {QueryFilter} from "mongoose";
+import {IToken} from "../interfaces/token.interface";
 
 const signup = async (req: Request, res: Response) => {
     const {username, email, password, confirmPassword} = req.body;
@@ -37,4 +44,86 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     })
 }
 
-export {signup, login}
+const requestResetPassword = async (req: Request, res: Response) => {
+    const {email} = req.body;
+    const user = await User.findOne({email});
+
+    if (!user) {
+        return res.status(200).json({
+            success: true,
+            message: "If the account exists, a password reset link will be sent",
+        });
+    }
+
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const hash = await bcrypt.hash(resetToken, env.bcryptSalt);
+
+    await Token.findOneAndUpdate(
+        {userId: user._id} as unknown as QueryFilter<IToken>,
+        {token: hash, createdAt: new Date()},
+        {upsert: true, new: true, setDefaultsOnInsert: true},
+    );
+
+    const resetLink = `${process.env.CLIENT_URL}/resetPassword?token=${resetToken}&id=${user._id}`;
+
+
+    await sendEmail({
+        email: user.email,
+        subject: "Password Reset Request",
+        payload: {
+            name: user.username,
+            link: resetLink,
+            expiresIn: "30 minutes",
+        },
+        template: "requestResetPassword.hbs",
+    });
+
+    res.status(200).json({
+        success: true,
+        message: "If the account exists, a password reset link will be sent",
+    });
+}
+
+const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+    const {userId, token, password} = req.body;
+
+    if (!userId || !token || !password) {
+        return next(new AppError("userId, token and password are required", 400));
+    }
+
+    const passwordResetToken = await Token.findOne({userId});
+
+    if (!passwordResetToken) {
+        return next(new AppError("Invalid or expired password reset token", 400));
+    }
+
+    const isValid = await bcrypt.compare(token, passwordResetToken.token);
+
+    if (!isValid) {
+        return next(new AppError("Invalid or expired password reset token", 400));
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return next(new AppError("No user found", 404));
+
+    user.password = password;
+    await user.save();
+
+    await sendEmail({
+        email: user.email,
+        subject: "Password reset successfully",
+        payload: {
+            name: user.username,
+        },
+        template: "resetPassword.hbs",
+    });
+    await passwordResetToken.deleteOne();
+
+    res.status(200).json({
+        success: true,
+        message: "Password reset successfully",
+    });
+}
+
+export {signup, login, requestResetPassword, resetPassword}

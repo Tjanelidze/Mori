@@ -50,7 +50,6 @@ const userSchema = new Schema<UserDocument>({
             message: "Passwords do not match!",
         },
     },
-
 }, {timestamps: true})
 
 userSchema.pre('save', async function () {

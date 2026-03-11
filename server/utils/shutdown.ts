@@ -1,6 +1,8 @@
+import {IncomingMessage, Server, ServerResponse} from "node:http";
+
 interface ShutdownProps {
     signal: string,
-    server: any,
+    server: Server<typeof IncomingMessage, typeof ServerResponse>,
     exitCode?: number
 }
 
