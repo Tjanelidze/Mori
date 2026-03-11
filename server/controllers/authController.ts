@@ -104,17 +104,11 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
         return next(new AppError("Invalid or expired password reset token", 400));
     }
 
-    const hash = await bcrypt.hash(password, env.bcryptSalt);
-    await User.findByIdAndUpdate(
-        userId,
-        {password: hash},
-        {new: true}
-    );
     const user = await User.findById(userId);
+    if (!user) return next(new AppError("No user found", 404));
 
-    if (!user) {
-        return next(new AppError("Incorrect email", 400));
-    }
+    user.password = password;
+    await user.save();
 
     await sendEmail({
         email: user.email,
