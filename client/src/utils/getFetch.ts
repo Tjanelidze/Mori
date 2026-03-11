@@ -14,5 +14,6 @@ export default function getFetch(url: string, params?: getFetchParams) {
   return fetch(fullUrl, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
   }).then((res) => res.json());
 }

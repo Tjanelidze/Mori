@@ -4,11 +4,12 @@ import cors from 'cors';
 
 import routes from './routes/index';
 import errorHandler from "./middleware/errorHandler";
-import {globalLimiter} from "./middleware/rateLimmiter";
+import {globalLimiter} from "./middleware/rateLimiter";
 
 dotenv.config();
 
 const app = express();
+app.set('trust proxy', 1);
 
 // 1) GLOBAL MIDDLEWARES
 app.use(cors({
@@ -16,9 +17,9 @@ app.use(cors({
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
-}))
+}));
 app.use(express.json());
-app.use(globalLimiter)
+app.use(globalLimiter);
 
 // 2) ROUTES
 app.use('/api/v1', routes);
