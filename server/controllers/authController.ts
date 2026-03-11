@@ -57,7 +57,7 @@ const requestResetPassword = async (req: Request, res: Response) => {
 
 
     const resetToken = crypto.randomBytes(32).toString("hex");
-    const hash = await bcrypt.hash(resetToken, Number(env.bcryptSalt));
+    const hash = await bcrypt.hash(resetToken, env.bcryptSalt);
 
     await Token.findOneAndUpdate(
         {userId: user._id} as unknown as QueryFilter<IToken>,
@@ -104,7 +104,7 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
         return next(new AppError("Invalid or expired password reset token", 400));
     }
 
-    const hash = await bcrypt.hash(password, Number(env.bcryptSalt));
+    const hash = await bcrypt.hash(password, env.bcryptSalt);
     await User.findByIdAndUpdate(
         userId,
         {password: hash},

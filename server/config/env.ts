@@ -13,5 +13,5 @@ for (const envVar of requiredEnvVars) {
 export const env = {
     jwtSecret: process.env.JWT_SECRET as string,
     jwtExpiresIn: process.env.JWT_EXPIRES_IN as string,
-    bcryptSalt: process.env.BCRYPT_SALT as string
+    bcryptSalt: parseInt(process.env.BCRYPT_SALT || '10', 10)
 };
