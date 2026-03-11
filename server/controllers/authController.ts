@@ -6,6 +6,9 @@ import crypto from 'crypto'
 import bcrypt from "bcrypt";
 import Token from "../model/Token";
 import sendEmail from "../utils/email/sendEmail";
+import {env} from "../config/env";
+import {QueryFilter} from "mongoose";
+import {IToken} from "../interfaces/token.interface";
 
 const signup = async (req: Request, res: Response) => {
     const {username, email, password, confirmPassword} = req.body;
@@ -51,20 +54,16 @@ const requestResetPassword = async (req: Request, res: Response) => {
             message: "If the account exists, a password reset link will be sent",
         });
     }
-    const token = await Token.findOne({userId: user.get('id')})
 
-    if (token) {
-        await token.deleteOne();
-    }
 
     const resetToken = crypto.randomBytes(32).toString("hex");
-    const hash = await bcrypt.hash(resetToken, process.env.BCRYPT_SALT!);
+    const hash = await bcrypt.hash(resetToken, Number(env.bcryptSalt));
 
-    await new Token({
-        userId: user._id,
-        token: hash,
-        createdAt: Date.now(),
-    }).save();
+    await Token.findOneAndUpdate(
+        {userId: user._id} as unknown as QueryFilter<IToken>,
+        {token: hash, createdAt: new Date()},
+        {upsert: true, new: true, setDefaultsOnInsert: true},
+    );
 
     const resetLink = `${process.env.CLIENT_URL}/resetPassword?token=${resetToken}&id=${user._id}`;
 
@@ -88,6 +87,11 @@ const requestResetPassword = async (req: Request, res: Response) => {
 
 const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
     const {userId, token, password} = req.body;
+
+    if (!userId || !token || !password) {
+        return next(new AppError("userId, token and password are required", 400));
+    }
+
     const passwordResetToken = await Token.findOne({userId});
 
     if (!passwordResetToken) {
@@ -100,8 +104,7 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
         return next(new AppError("Invalid or expired password reset token", 400));
     }
 
-    const bcryptSalt = await bcrypt.genSalt(12);
-    const hash = await bcrypt.hash(password, Number(bcryptSalt));
+    const hash = await bcrypt.hash(password, Number(env.bcryptSalt));
     await User.findByIdAndUpdate(
         userId,
         {password: hash},
@@ -115,7 +118,7 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
 
     await sendEmail({
         email: user.email,
-        subject: "Password Reset Successfully",
+        subject: "Password reset successfully",
         payload: {
             name: user.username,
         },
@@ -125,7 +128,7 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
 
     res.status(200).json({
         success: true,
-        message: "Password rested successfully",
+        message: "Password reset successfully",
     });
 }
 
