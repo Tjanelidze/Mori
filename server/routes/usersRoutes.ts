@@ -1,25 +1,16 @@
 import express from 'express';
-import catchAsync from "../utils/catchAsync";
-import {rateLimit} from "express-rate-limit";
 
-import * as authController from '../controllers/authController'
+import catchAsync from "../utils/catchAsync";
+import * as authController from '../controllers/authController';
+import {forgotPasswordLimiter, resetPasswordLimiter, usersLimiter} from "../middleware/rateLimiter";
 
 const router = express.Router();
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit: 5,
-    message: {
-        status: 'fail',
-        message: 'Too many login attempts from this IP, please try again after 15 minutes'
-    },
-    standardHeaders: 'draft-8',
-    legacyHeaders: false,
-})
 
-router.post("/signup", catchAsync(authController.signup))
-router.post("/login", limiter, catchAsync(authController.login))
-router.post("/forgotPassword", limiter, catchAsync(authController.requestResetPassword))
-router.post("/resetPassword", limiter, catchAsync(authController.resetPassword))
+
+router.post("/signup", catchAsync(authController.signup));
+router.post("/login", usersLimiter, catchAsync(authController.login));
+router.post("/forgotPassword", forgotPasswordLimiter, catchAsync(authController.requestResetPassword));
+router.post("/resetPassword", resetPasswordLimiter, catchAsync(authController.resetPassword));
 
 
 export default router;

@@ -5,7 +5,10 @@ interface getFetchParams {
 export default function getFetch(url: string, params?: getFetchParams) {
   const queryString = params
     ? Object.entries(params)
-        .map(([key, value]) => `${key}=${value}`)
+        .map(
+          ([key, value]) =>
+            `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+        )
         .join("&")
     : "";
 
@@ -14,5 +17,6 @@ export default function getFetch(url: string, params?: getFetchParams) {
   return fetch(fullUrl, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
   }).then((res) => res.json());
 }
