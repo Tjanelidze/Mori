@@ -2,7 +2,7 @@ interface getFetchParams {
   key: string;
 }
 
-export default function getFetch(url: string, params?: getFetchParams) {
+export default async function getFetch(url: string, params?: getFetchParams) {
   const queryString = params
     ? Object.entries(params)
         .map(
@@ -14,9 +14,15 @@ export default function getFetch(url: string, params?: getFetchParams) {
 
   const fullUrl = queryString ? `${url}?${queryString}` : url;
 
-  return fetch(fullUrl, {
+  const res = await fetch(fullUrl, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization:
+        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YWFlMDJmMDQ5Y2I4NGQxMWZlZTA1NSIsImlhdCI6MTc3MzMxMzkyMywiZXhwIjoxNzczMzE3NTIzfQ.VTz9seTBbRgAwcbpssVGU9BfrzpG_LMiizWTsXYVsM4",
+    },
     credentials: "include",
-  }).then((res) => res.json());
+  });
+
+  return res.json();
 }

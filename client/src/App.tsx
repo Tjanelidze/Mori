@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuid4 } from "uuid";
 
 import { TaskInput } from "./components/TaskInput/TaskInput";
 import { TodoItem } from "./components/TodoItem/TodoItem";
@@ -7,10 +7,14 @@ import { TodoItem } from "./components/TodoItem/TodoItem";
 import getFetch from "./utils/getFetch";
 
 export interface Todos {
-  id: string;
-  userId: string;
+  _id: string;
+  user: string;
   title: string;
-  completed: boolean;
+  isFinished: boolean;
+  priority?: "low" | "medium" | "high";
+  reps?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const PAGE_SIZE = 4;
@@ -20,10 +24,12 @@ function App() {
   const [taskInput, setTaskInput] = useState("");
   const [page, setPage] = useState(0);
   const [editTodo, setEditTodo] = useState<Todos>();
+  const [priority] = useState<string>("");
+  const [isFinished] = useState<boolean | undefined>(undefined);
+  const [searchTitle] = useState<string>("");
 
-  const start = page * PAGE_SIZE;
-  const end = start + PAGE_SIZE;
-  const paginationTodos = todos.slice(start, end);
+  console.log(todos);
+  const paginationTodos = todos;
 
   const handleTaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTaskInput(e.currentTarget.value);
@@ -32,10 +38,10 @@ function App() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newTodo: Todos = {
-      id: uuidv4(),
-      userId: uuidv4(),
+      _id: uuid4(),
+      user: uuid4(),
       title: taskInput,
-      completed: false,
+      isFinished: false,
     };
     const newTodos = [...todos, newTodo];
 
@@ -44,26 +50,36 @@ function App() {
   };
 
   const handleDelete = (todoId: string) => {
-    setTodos((todos) => todos.filter((todo) => todo.id !== todoId));
+    setTodos((todos) => todos.filter((todo) => todo._id !== todoId));
   };
 
-  // TODO: implement edit mode
   const handleEdit = (todoId: string) => {
-    const selectedTodo = todos.find((todo) => todo.id === todoId);
+    const selectedTodo = todos.find((todo) => todo._id === todoId);
     setEditTodo(selectedTodo);
   };
 
   useEffect(() => {
     const fetchTodos = async () => {
-      const data = await getFetch(
-        `https://jsonplaceholder.typicode.com/todos?_limit=${PAGE_SIZE}`,
-      );
+      const params = new URLSearchParams({
+        limit: PAGE_SIZE.toString(),
+        page: (page + 1).toString(),
+      });
 
-      setTodos(data);
+      if (priority) params.append("priority", priority);
+      if (isFinished !== undefined) {
+        params.append("isFinished", String(isFinished));
+      }
+      if (searchTitle) params.append("title", searchTitle);
+
+      const url = `http://localhost:3000/api/v1/todos?${params.toString()}`;
+
+      const data = await getFetch(url);
+
+      setTodos(data.data.todos);
     };
 
     fetchTodos();
-  }, []);
+  }, [isFinished, page, priority, searchTitle]);
 
   return (
     <>
@@ -72,7 +88,7 @@ function App() {
       <div className="h-96 w-3xs border-2 border-amber-300">
         {paginationTodos?.map((todo) => (
           <TodoItem
-            key={todo.id}
+            key={todo._id}
             todo={todo}
             selectedTodo={editTodo}
             setEditTodo={setEditTodo}
