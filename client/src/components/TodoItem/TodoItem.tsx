@@ -30,7 +30,7 @@ export const TodoItem = ({
           setIsEdit(false);
           setTodos((prev) => {
             return prev.map((item) => {
-              if (item.id === selectedTodo!.id) {
+              if (item._id === selectedTodo!._id) {
                 return selectedTodo!;
               }
 
@@ -62,7 +62,7 @@ export const TodoItem = ({
           className="cursor-pointer font-bold text-emerald-800"
           onClick={() => {
             setIsEdit(true);
-            onEdit(todo.id);
+            onEdit(todo._id);
           }}
         >
           /
@@ -70,7 +70,7 @@ export const TodoItem = ({
 
         <button
           className="cursor-pointer text-red-600"
-          onClick={() => onDelete(todo.id)}
+          onClick={() => onDelete(todo._id)}
         >
           X
         </button>
