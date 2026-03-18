@@ -6,7 +6,7 @@ import { Application } from "pixi.js";
 export const LoginCanvas = () => {
   const containerRef = useRef<null | HTMLDivElement>(null);
   const engineRef = useRef<LoginEngine | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // Added loading state
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const app = new Application();
@@ -21,12 +21,7 @@ export const LoginCanvas = () => {
           autoDensity: true,
         });
 
-        if (!isAlive) {
-          app.destroy(true, { children: true, texture: true });
-          return;
-        }
-
-        if (!containerRef.current) {
+        if (!isAlive || !containerRef.current) {
           app.destroy(true, { children: true, texture: true });
           return;
         }
