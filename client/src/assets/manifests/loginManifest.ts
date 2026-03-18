@@ -3,9 +3,9 @@ export const loginManifest = {
     {
       name: "login-screen",
       assets: {
-        background: "/images/bg_scriptorium_day.png",
-        hero: "/sprites/spr_hero_writing.json",
-        cat: "/sprites/spr_cat_atlas_sleep.json",
+        background: "/images/bg_scriptorium.png",
+        hero: "/sprites/spr_character_writing.png",
+        cat: "/sprites/spr_cat_atlas_sleep.png",
       },
     },
   ],
